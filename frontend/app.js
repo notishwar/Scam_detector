@@ -15,7 +15,10 @@ const state = {
         urls: [],
         crypto_wallets: [],
         emails: [],
-        ip_addresses: []
+        ip_addresses: [],
+        locations: [],
+        addresses: [],
+        geo_coordinates: []
     }
 };
 
@@ -42,6 +45,9 @@ const elements = {
     intelCrypto: document.getElementById('intel-crypto'),
     intelEmail: document.getElementById('intel-email'),
     intelIp: document.getElementById('intel-ip'),
+    intelLocations: document.getElementById('intel-locations'),
+    intelAddresses: document.getElementById('intel-addresses'),
+    intelCoords: document.getElementById('intel-coordinates'),
     themeToggle: document.getElementById('theme-toggle'),
     clearActivityBtn: document.getElementById('clear-activity-btn'),
     sidebar: document.getElementById('sidebar'),
@@ -302,6 +308,9 @@ function renderIntel() {
     renderIntelSection(elements.intelCrypto, state.intel.crypto_wallets);
     renderIntelSection(elements.intelEmail, state.intel.emails);
     renderIntelSection(elements.intelIp, state.intel.ip_addresses);
+    renderIntelSection(elements.intelLocations, state.intel.locations);
+    renderIntelSection(elements.intelAddresses, state.intel.addresses);
+    renderIntelSection(elements.intelCoords, state.intel.geo_coordinates);
 }
 
 function renderIntelSection(container, items) {
@@ -416,7 +425,18 @@ function clearActivity() {
         state.inboxItems = [];
 
         // Clear intel
-        state.intel = { upi_ids: [], bank_accounts: [], phone_numbers: [], urls: [], crypto_wallets: [], emails: [], ip_addresses: [] };
+        state.intel = {
+            upi_ids: [],
+            bank_accounts: [],
+            phone_numbers: [],
+            urls: [],
+            crypto_wallets: [],
+            emails: [],
+            ip_addresses: [],
+            locations: [],
+            addresses: [],
+            geo_coordinates: []
+        };
         renderIntel();
 
         // Clear search

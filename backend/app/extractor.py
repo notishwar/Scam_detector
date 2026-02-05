@@ -129,5 +129,30 @@ def extract_intelligence(text: str) -> ExtractedIntel:
         except ValueError:
             pass
     intel.ip_addresses = list(set(valid_ips))
+
+    # Extract geo coordinates (lat, lon)
+    coord_pattern = r'\b-?(?:[0-8]?\d(?:\.\d+)?|90(?:\.0+)?)[,\s]+-?(?:1[0-7]\d(?:\.\d+)?|180(?:\.0+)?|[0-9]?\d(?:\.\d+)?)\b'
+    coord_matches = re.findall(coord_pattern, text)
+    intel.geo_coordinates = list(set([c.strip() for c in coord_matches]))
+
+    # Extract street addresses (simple heuristic)
+    address_pattern = r'\b\d{1,6}\s+(?:[A-Za-z0-9]+\s){0,4}(?:Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Boulevard|Blvd|Drive|Dr|Court|Ct|Place|Pl|Way|Parkway|Pkwy)\b'
+    addresses = re.findall(address_pattern, text, re.IGNORECASE)
+    intel.addresses = list(set([a.strip() for a in addresses]))
+
+    # Extract location phrases (City, ST / City, Country / "in <Place>")
+    location_matches = []
+    location_patterns = [
+        r'\b[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)*,\s?[A-Z]{2}\b',  # City, ST
+        r'\b[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)*,\s?[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)*\b',  # City, Country
+        r'\b(?:in|from)\s+([A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+){0,3})\b'
+    ]
+    for pattern in location_patterns:
+        matches = re.findall(pattern, text)
+        for match in matches:
+            if isinstance(match, tuple):
+                match = match[0]
+            location_matches.append(match)
+    intel.locations = list(set([loc.strip() for loc in location_matches if loc]))
     
     return intel

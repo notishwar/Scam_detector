@@ -16,6 +16,9 @@ class ExtractedIntel(BaseModel):
     crypto_wallets: List[str] = []
     emails: List[str] = []
     ip_addresses: List[str] = []
+    locations: List[str] = []
+    addresses: List[str] = []
+    geo_coordinates: List[str] = []
 
 class AgentResponse(BaseModel):
     reply: str
