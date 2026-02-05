@@ -21,6 +21,7 @@ const state = {
 
 // ============== DOM ELEMENTS ==============
 const elements = {
+    appContainer: document.querySelector('.app-container'),
     apiKeyInput: document.getElementById('llm-api-key'),
     llmBaseUrlInput: document.getElementById('llm-base-url'),
     llmModelInput: document.getElementById('llm-model'),
@@ -45,12 +46,17 @@ const elements = {
     clearActivityBtn: document.getElementById('clear-activity-btn'),
     sidebar: document.getElementById('sidebar'),
     intelPanel: document.querySelector('.intel-panel'),
-    searchInput: document.getElementById('search-input')
+    searchInput: document.getElementById('search-input'),
+    chatView: document.querySelector('.chat-view')
 };
 
 // ============== INITIALIZATION ==============
 function init() {
     state.sessionId = 'sess_' + generateId();
+
+    if (elements.appContainer) {
+        elements.appContainer.dataset.mobileView = 'chat';
+    }
 
     // Load saved values
     if (elements.apiKeyInput) elements.apiKeyInput.value = state.apiKey;
@@ -443,6 +449,10 @@ function switchMobileView(view, activeItem) {
 
     elements.sidebar.classList.toggle('active', view === 'inbox');
     elements.intelPanel.classList.toggle('active', view === 'intel');
+
+    if (elements.appContainer) {
+        elements.appContainer.dataset.mobileView = view;
+    }
 
     if (view === 'chat') {
         elements.sidebar.classList.remove('active');

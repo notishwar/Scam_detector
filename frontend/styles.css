@@ -952,6 +952,7 @@ body.light-theme .message.scammer .message-bubble {
     height: calc(var(--mobile-nav-height) + var(--safe-bottom));
     align-items: center;
     backdrop-filter: blur(12px);
+    z-index: 60;
 }
 
 .nav-item {
@@ -1099,6 +1100,16 @@ body.light-theme .message.scammer .message-bubble {
     .sidebar.active,
     .intel-panel.active {
         display: flex;
+    }
+
+    .app-container[data-mobile-view="inbox"] .sidebar,
+    .app-container[data-mobile-view="intel"] .intel-panel {
+        display: flex;
+    }
+
+    .app-container[data-mobile-view="inbox"] .chat-view,
+    .app-container[data-mobile-view="intel"] .chat-view {
+        display: none;
     }
 
     .mobile-nav {
