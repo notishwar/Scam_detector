@@ -2,8 +2,8 @@
 const state = {
     sessionId: null,
     apiKey: sessionStorage.getItem('llm_api_key') || '',
-    llmUrl: sessionStorage.getItem('llm_url') || '',
-    llmModel: sessionStorage.getItem('llm_model') || 'gpt-3.5-turbo',
+    llmUrl: sessionStorage.getItem('llm_url') || 'https://openrouter.ai/api/v1/chat/completions',
+    llmModel: sessionStorage.getItem('llm_model') || 'meta-llama/llama-3.1-8b-instruct',
     backendUrl: 'https://honeypot-backend-production-8bc9.up.railway.app',
     persona: 'elderly',
     inboxItems: [],
