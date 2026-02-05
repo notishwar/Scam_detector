@@ -1,0 +1,8 @@
+@'
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.qodo/
+'@ | Set-Content -NoNewline .gitignore
