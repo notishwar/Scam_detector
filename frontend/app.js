@@ -4,7 +4,7 @@ const state = {
     apiKey: sessionStorage.getItem('llm_api_key') || '',
     llmUrl: sessionStorage.getItem('llm_url') || '',
     llmModel: sessionStorage.getItem('llm_model') || 'gpt-3.5-turbo',
-    backendUrl: 'http://localhost:8000',
+    backendUrl: 'https://honeypot-backend-production-8bc9.up.railway.app',
     persona: 'elderly',
     inboxItems: [],
     currentInboxIndex: 0,
