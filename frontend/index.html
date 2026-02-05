@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Honey-Pot - Scam Intelligence Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2"
+                            stroke-linejoin="round" />
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    <div class="logo-text">
+                        <span class="logo-title">Agentic <span class="accent">Honey-Pot</span></span>
+                        <span class="logo-subtitle">Scam Intelligence Dashboard</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status-badge" id="connection-status">
+                    <span class="dot"></span>
+                    <span>Disconnected</span>
+                </div>
+                <button class="icon-button" id="theme-toggle" title="Toggle Dark/Light Mode">
+                    <svg class="theme-icon moon-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <svg class="theme-icon sun-icon" viewBox="0 0 24 24" fill="none" style="display: none;">
+                        <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
+                        <path
+                            d="M12 1v3m0 16v3M4.22 4.22l2.12 2.12m11.32 11.32l2.12 2.12M1 12h3m16 0h3M4.22 19.78l2.12-2.12m11.32-11.32l2.12-2.12"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-layout">
+            <!-- Sidebar: Inbox -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <input type="text" class="search-input" placeholder="Search activity" id="search-input">
+                </div>
+
+                <div class="inbox-section">
+                    <div class="section-title">Inbox</div>
+                    <div class="inbox-list" id="inbox-list">
+                        <!-- Inbox items dynamically added -->
+                    </div>
+                </div>
+
+                <div class="chat-playback-section">
+                    <div class="section-title">Chat Playback</div>
+                    <button class="clear-activity-btn" id="clear-activity-btn">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M3 6h18M8 6V4h8v2M10 11v6M14 11v6M5 6l1 14h12l1-14" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        Clear Activity
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Center: Chat -->
+            <main class="chat-view">
+                <!-- Connection Settings Panel (collapsible) -->
+                <div class="connection-panel" id="connection-panel">
+                    <div class="connection-header">
+                        <h3>Connection</h3>
+                    </div>
+                    <div class="connection-body">
+                        <div class="form-group">
+                            <label>LLM API Key</label>
+                            <div class="input-with-status">
+                                <input type="password" id="llm-api-key" placeholder="sk-..." class="masked-input">
+                                <span class="connection-badge" id="api-status">Connected</span>
+                            </div>
+                        </div>
+
+                        <!-- Timeline (Conversation Duration) -->
+                        <div class="timeline-container">
+                            <span class="timeline-label">3:00:30</span>
+                            <div class="timeline-track">
+                                <div class="timeline-progress" id="timeline-progress"></div>
+                                <div class="timeline-handle" id="timeline-handle"></div>
+                            </div>
+                            <span class="timeline-label">-0:15:12</span>
+                            <button class="timeline-btn">▶</button>
+                        </div>
+
+                        <!-- Settings (collapsible) -->
+                        <details class="settings-details">
+                            <summary>Advanced Settings</summary>
+                            <div class="settings-content">
+                                <div class="form-group">
+                                    <label>Backend URL</label>
+                                    <input type="text" id="backend-url" value="http://localhost:8000">
+                                </div>
+                                <div class="form-group">
+                                    <label>LLM Base URL</label>
+                                    <input type="text" id="llm-base-url"
+                                        placeholder="https://api.openai.com/v1/chat/completions">
+                                </div>
+                                <div class="form-group">
+                                    <label>Model Name</label>
+                                    <input type="text" id="llm-model" value="gpt-3.5-turbo" placeholder="gpt-3.5-turbo">
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- Chat Header with Platform & Risk Info -->
+                <div class="chat-header-bar">
+                    <div class="chat-title">
+                        <span class="platform-badge">Platform</span>
+                        <span class="session-selector" id="session-selector">
+                            <select id="persona-select">
+                                <option value="elderly">Elderly</option>
+                                <option value="student">Student</option>
+                                <option value="naive">Naive</option>
+                            </select>
+                        </span>
+                    </div>
+                    <div class="stat-badges">
+                        <div class="stat-badge">📊 565</div>
+                        <div class="stat-badge">💬 166</div>
+                        <div class="stat-badge">⏱ -0:0</div>
+                    </div>
+                </div>
+
+                <!-- Messages Area -->
+                <div class="messages-area" id="messages-area">
+                    <!-- Messages rendered here -->
+                </div>
+
+                <!-- Input Area with Scammer Message -->
+                <div class="input-panel">
+                    <div class="scammer-panel-header">
+                        <span class="panel-title">Scammer Message</span>
+                        <div class="fraud-indicator">
+                            <span class="fraud-badge" id="fraud-badge">HIGH</span>
+                            <span class="fraud-percent" id="fraud-percent">Fraud Risk: 92%</span>
+                        </div>
+                    </div>
+                    <textarea class="scammer-input" id="scammer-input"
+                        placeholder="Paste scammer message here"></textarea>
+                    <button class="analyze-button" id="analyze-btn">Analyze & Reply</button>
+                </div>
+            </main>
+
+            <!-- Right Panel: Intel -->
+            <aside class="intel-panel">
+                <div class="intel-header">
+                    <h3>Intelligence Extraction</h3>
+                </div>
+                <div class="intel-body">
+                    <div class="intel-code-block">
+                        <div class="code-line"><span class="bracket">{</span></div>
+                        <div class="code-section">
+                            <div class="code-line indent"><span class="key">"UPI_IDs"</span><span class="colon">:</span>
+                                <span class="bracket">[</span>
+                            </div>
+                            <div class="code-content" id="intel-upi"></div>
+                            <div class="code-line indent"><span class="bracket">]</span><span class="comma">,</span>
+                            </div>
+                        </div>
+                        <div class="code-section">
+                            <div class="code-line indent"><span class="key">"Bank_Accounts"</span><span
+                                    class="colon">:</span> <span class="bracket">[</span></div>
+                            <div class="code-content" id="intel-bank"></div>
+                            <div class="code-line indent"><span class="bracket">]</span><span class="comma">,</span>
+                            </div>
+                        </div>
+                        <div class="code-section">
+                            <div class="code-line indent"><span class="key">"Phone_Numbers"</span><span
+                                    class="colon">:</span> <span class="bracket">[</span></div>
+                            <div class="code-content" id="intel-phone"></div>
+                            <div class="code-line indent"><span class="bracket">]</span><span class="comma">,</span>
+                            </div>
+                        </div>
+                        <div class="code-section">
+                            <div class="code-line indent"><span class="key">"Phishing_URLs"</span><span
+                                    class="colon">:</span> <span class="bracket">[</span></div>
+                            <div class="code-content" id="intel-url"></div>
+                            <div class="code-line indent"><span class="bracket">]</span></div>
+                        </div>
+                    </div>
+                    <div class="code-section">
+                        <div class="code-line indent"><span class="key">"Crypto_Wallets"</span><span
+                                class="colon">:</span> <span class="bracket">[</span></div>
+                        <div class="code-content" id="intel-crypto"></div>
+                        <div class="code-line indent"><span class="bracket">]</span><span class="comma">,</span></div>
+                    </div>
+                    <div class="code-section">
+                        <div class="code-line indent"><span class="key">"Email_Addresses"</span><span
+                                class="colon">:</span> <span class="bracket">[</span></div>
+                        <div class="code-content" id="intel-email"></div>
+                        <div class="code-line indent"><span class="bracket">]</span><span class="comma">,</span></div>
+                    </div>
+                    <div class="code-section">
+                        <div class="code-line indent"><span class="key">"IP_Addresses"</span><span
+                                class="colon">:</span> <span class="bracket">[</span></div>
+                        <div class="code-content" id="intel-ip"></div>
+                        <div class="code-line indent"><span class="bracket">]</span></div>
+                    </div>
+                    <div class="code-line"><span class="bracket">}</span></div>
+                </div>
+        </div>
+        </aside>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <button class="nav-item" data-view="inbox">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    stroke="currentColor" stroke-width="2" />
+            </svg>
+            <span>Inbox</span>
+        </button>
+        <button class="nav-item active" data-view="chat">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor"
+                    stroke-width="2" />
+            </svg>
+            <span>Chat</span>
+        </button>
+        <button class="nav-item" data-view="intel">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    stroke="currentColor" stroke-width="2" />
+            </svg>
+            <span>Intel</span>
+        </button>
+    </nav>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
