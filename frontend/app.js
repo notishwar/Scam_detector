@@ -106,7 +106,7 @@ function setupEventListeners() {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', (e) => {
             const view = e.currentTarget.dataset.view;
-            switchMobileView(view);
+            switchMobileView(view, e.currentTarget);
         });
     });
 
@@ -433,19 +433,20 @@ function clearActivity() {
     }
 }
 
-function switchMobileView(view) {
+function switchMobileView(view, activeItem) {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
-    event.target.closest('.nav-item').classList.add('active');
+    if (activeItem) {
+        activeItem.classList.add('active');
+    }
 
-    elements.sidebar.classList.remove('active');
-    elements.intelPanel.classList.remove('active');
+    elements.sidebar.classList.toggle('active', view === 'inbox');
+    elements.intelPanel.classList.toggle('active', view === 'intel');
 
-    if (view === 'inbox') {
-        elements.sidebar.classList.add('active');
-    } else if (view === 'intel') {
-        elements.intelPanel.classList.add('active');
+    if (view === 'chat') {
+        elements.sidebar.classList.remove('active');
+        elements.intelPanel.classList.remove('active');
     }
 }
 

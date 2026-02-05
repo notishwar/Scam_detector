@@ -22,6 +22,9 @@
     --radius-sm: 8px;
     --shadow-elev: 0 18px 40px rgba(8, 11, 20, 0.45);
     --panel-glass: rgba(15, 20, 30, 0.85);
+    --mobile-header-height: 56px;
+    --mobile-nav-height: 56px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
     --page-gradient: radial-gradient(1200px 600px at 10% -10%, rgba(255, 107, 53, 0.25), transparent 60%),
         radial-gradient(900px 500px at 90% -5%, rgba(45, 212, 191, 0.18), transparent 55%),
         radial-gradient(800px 400px at 50% 120%, rgba(255, 209, 102, 0.12), transparent 60%);
@@ -945,7 +948,9 @@ body.light-theme .message.scammer .message-bubble {
     display: none;
     background: var(--panel-glass);
     border-top: 1px solid var(--border-color);
-    padding: 8px;
+    padding: 8px 12px calc(8px + var(--safe-bottom));
+    height: calc(var(--mobile-nav-height) + var(--safe-bottom));
+    align-items: center;
     backdrop-filter: blur(12px);
 }
 
@@ -1028,6 +1033,8 @@ body.light-theme .message.scammer .message-bubble {
     :root {
         --sidebar-width: 100%;
         --intel-width: 100%;
+        --mobile-header-height: 56px;
+        --mobile-nav-height: 56px;
     }
 
     .main-layout {
@@ -1043,7 +1050,7 @@ body.light-theme .message.scammer .message-bubble {
     }
 
     .header {
-        height: 56px;
+        height: var(--mobile-header-height);
         padding: 0 12px;
     }
 
@@ -1077,10 +1084,10 @@ body.light-theme .message.scammer .message-bubble {
     .sidebar,
     .intel-panel {
         position: fixed;
-        top: 56px;
+        top: var(--mobile-header-height);
         left: 0;
         right: 0;
-        bottom: 56px;
+        bottom: calc(var(--mobile-nav-height) + var(--safe-bottom));
         width: 100%;
         z-index: 50;
         display: none;
@@ -1257,8 +1264,13 @@ body.light-theme .message.scammer .message-bubble {
 
 /* Small Mobile (480px and below) */
 @media (max-width: 480px) {
+    :root {
+        --mobile-header-height: 52px;
+        --mobile-nav-height: 52px;
+    }
+
     .header {
-        height: 52px;
+        height: var(--mobile-header-height);
         padding: 0 10px;
     }
 
@@ -1283,7 +1295,7 @@ body.light-theme .message.scammer .message-bubble {
 
     .sidebar,
     .intel-panel {
-        top: 52px;
+        top: var(--mobile-header-height);
     }
 
     .connection-panel {
@@ -1367,8 +1379,13 @@ body.light-theme .message.scammer .message-bubble {
 
 /* Extra Small Mobile (360px and below) */
 @media (max-width: 360px) {
+    :root {
+        --mobile-header-height: 48px;
+        --mobile-nav-height: 48px;
+    }
+
     .header {
-        height: 48px;
+        height: var(--mobile-header-height);
     }
 
     .logo-title {
