@@ -1,0 +1,15 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual env
+.venv/
+
+# Logs
+*.log
+uvicorn-local*.log
+
+# Temp docx extraction
+.tmp_docx/
+.tmp_docx.zip

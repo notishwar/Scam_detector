@@ -1,7 +1,8 @@
 // ============== STATE MANAGEMENT ==============
 const state = {
     sessionId: null,
-    apiKey: sessionStorage.getItem('llm_api_key') || '',
+    apiKey: '',
+    useServerKey: true,
     llmUrl: sessionStorage.getItem('llm_url') || 'https://openrouter.ai/api/v1/chat/completions',
     llmModel: sessionStorage.getItem('llm_model') || 'meta-llama/llama-3.1-8b-instruct',
     backendUrl: 'https://honeypot-backend-production-8bc9.up.railway.app',
@@ -59,6 +60,7 @@ const elements = {
 // ============== INITIALIZATION ==============
 function init() {
     state.sessionId = 'sess_' + generateId();
+    sessionStorage.removeItem('llm_api_key');
 
     if (elements.appContainer) {
         elements.appContainer.dataset.mobileView = 'chat';
@@ -132,12 +134,14 @@ function setupEventListeners() {
 
 // ============== CONNECTION STATUS ==============
 function updateConnectionStatus() {
-    const isConnected = state.apiKey && state.apiKey.length > 10;
+    const hasClientKey = state.apiKey && state.apiKey.length > 10;
+    const isConnected = hasClientKey || state.useServerKey;
+    const statusText = hasClientKey ? 'Connected' : 'Server Key';
 
     if (elements.connectionStatus) {
         if (isConnected) {
             elements.connectionStatus.classList.add('connected');
-            elements.connectionStatus.querySelector('span:last-child').textContent = 'Connected';
+            elements.connectionStatus.querySelector('span:last-child').textContent = statusText;
         } else {
             elements.connectionStatus.classList.remove('connected');
             elements.connectionStatus.querySelector('span:last-child').textContent = 'Disconnected';
@@ -145,7 +149,7 @@ function updateConnectionStatus() {
     }
 
     if (elements.apiStatus) {
-        elements.apiStatus.textContent = isConnected ? 'Connected' : 'Not Connected';
+        elements.apiStatus.textContent = isConnected ? statusText : 'Not Connected';
         elements.apiStatus.style.background = isConnected
             ? 'rgba(16, 185, 129, 0.2)'
             : 'rgba(239, 68, 68, 0.2)';
@@ -160,7 +164,7 @@ async function handleAnalyze() {
     const message = elements.scammerInput.value.trim();
     if (!message) return;
 
-    if (!state.apiKey) {
+    if (!state.apiKey && !state.useServerKey) {
         alert('Please enter your API Key in the settings first!');
         return;
     }
@@ -174,12 +178,17 @@ async function handleAnalyze() {
     elements.analyzeBtn.textContent = 'Analyzing...';
 
     try {
-        const response = await fetch(`${state.backendUrl}/message`, {
+        const baseUrl = (state.backendUrl || '').replace(/\/+$/, '');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (state.apiKey) {
+            headers['X-LLM-API-KEY'] = state.apiKey;
+        }
+
+        const response = await fetch(`${baseUrl}/message`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-LLM-API-KEY': state.apiKey
-            },
+            headers,
             body: JSON.stringify({
                 session_id: state.sessionId,
                 message: message,

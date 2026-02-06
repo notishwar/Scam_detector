@@ -483,6 +483,19 @@ body.light-theme::before {
     align-items: center;
 }
 
+.server-key-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
 .masked-input {
     flex: 1;
     font-family: var(--font-mono);

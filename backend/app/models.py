@@ -19,8 +19,8 @@ class HackathonMessage(BaseModel):
 class HackathonChatRequest(BaseModel):
     sessionId: str
     message: HackathonMessage
-    conversationHistory: List[HackathonMessage] = []
-    metadata: Dict[str, Any] = {}
+    conversationHistory: List[HackathonMessage] = Field(default_factory=list)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
     class Config:
         extra = "forbid"
@@ -49,6 +49,6 @@ class HackathonChatResponse(BaseModel):
 
 class SessionData(BaseModel):
     session_id: str
-    history: List[Dict[str, str]] = []  # List of {"role": "user"|"assistant", "content": "..."}
+    history: List[Dict[str, str]] = Field(default_factory=list)  # List of {"role": "user"|"assistant", "content": "..."}
     persona: str
     created_at: float
