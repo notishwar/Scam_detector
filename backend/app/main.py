@@ -104,7 +104,14 @@ def _extract_suspicious_keywords(text: str) -> List[str]:
                 matches.append(kw)
     return list(set(matches))
 
-async def send_guvi_callback(session_id: str, extracted_data: ExtractedIntel, msg_count: int, scam_detected: bool, suspicious_keywords: List[str]):
+async def send_guvi_callback(
+    session_id: str,
+    extracted_data: ExtractedIntel,
+    msg_count: int,
+    scam_detected: bool,
+    suspicious_keywords: List[str],
+    agent_notes: str
+):
     payload = {
         "sessionId": session_id,
         "scamDetected": scam_detected,
@@ -116,7 +123,7 @@ async def send_guvi_callback(session_id: str, extracted_data: ExtractedIntel, ms
             "phoneNumbers": extracted_data.phone_numbers,
             "suspiciousKeywords": suspicious_keywords
         },
-        "agentNotes": "Scam detected." if scam_detected else "Threshold reached."
+        "agentNotes": agent_notes
     }
     try:
         async with httpx.AsyncClient() as client:
@@ -129,7 +136,9 @@ async def get_hackathon_api_key(x_api_key: Optional[str] = Header(None, alias="x
     if not x_api_key:
         raise HTTPException(status_code=401, detail="Missing x-api-key header")
     expected = os.getenv("HACKATHON_API_KEY")
-    if expected and x_api_key != expected:
+    if not expected:
+        raise HTTPException(status_code=401, detail="Server not configured with HACKATHON_API_KEY")
+    if x_api_key != expected:
         raise HTTPException(status_code=401, detail="Invalid x-api-key header")
     return x_api_key
 
@@ -169,8 +178,12 @@ async def chat_hackathon(
     msg_count = len(request.conversationHistory) + 1
     scam_detected = scam_confidence > 50
     suspicious_keywords = _extract_suspicious_keywords(request.message.text)
+    agent_notes = (
+        f"Scam detected with confidence {scam_confidence}. "
+        f"Keywords: {', '.join(suspicious_keywords) or 'none'}."
+    )
 
-    if scam_detected or msg_count >= GUVI_TURN_THRESHOLD:
+    if scam_detected and msg_count >= GUVI_TURN_THRESHOLD:
         background_tasks.add_task(
             send_guvi_callback,
             request.sessionId,
@@ -178,6 +191,7 @@ async def chat_hackathon(
             msg_count,
             scam_detected,
             suspicious_keywords,
+            agent_notes,
         )
 
     return HackathonChatResponse(status="success", reply=reply)
