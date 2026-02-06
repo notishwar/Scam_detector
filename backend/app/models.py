@@ -8,6 +8,23 @@ class ChatMessage(BaseModel):
     llm_url: Optional[str] = None
     llm_model: Optional[str] = None
 
+class HackathonMessage(BaseModel):
+    sender: str
+    text: str
+    timestamp: int
+
+    class Config:
+        extra = "forbid"
+
+class HackathonChatRequest(BaseModel):
+    sessionId: str
+    message: HackathonMessage
+    conversationHistory: List[HackathonMessage] = []
+    metadata: Dict[str, Any] = {}
+
+    class Config:
+        extra = "forbid"
+
 class ExtractedIntel(BaseModel):
     upi_ids: List[str] = []
     bank_accounts: List[str] = []
@@ -25,6 +42,10 @@ class AgentResponse(BaseModel):
     scam_confidence: float
     risk_tags: List[str]
     extracted_intel: ExtractedIntel
+
+class HackathonChatResponse(BaseModel):
+    status: str
+    reply: str
 
 class SessionData(BaseModel):
     session_id: str

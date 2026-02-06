@@ -1,5 +1,5 @@
 import httpx
-from typing import List, Dict
+from typing import List, Dict, Optional
 from .models import SessionData
 
 SYSTEM_PROMPTS = {
@@ -97,10 +97,10 @@ class HoneyPotAgent:
         self.api_url = llm_url if llm_url and llm_url.strip() else "https://api.openai.com/v1/chat/completions"
         self.model = llm_model if llm_model and llm_model.strip() else "gpt-3.5-turbo"
 
-    async def generate_response(self, message: str, session: SessionData) -> str:
+    async def generate_response(self, message: str, session: SessionData, history_override: Optional[List[Dict[str, str]]] = None) -> str:
         # Build conversation history
         messages = [{"role": "system", "content": SYSTEM_PROMPTS.get(session.persona, SYSTEM_PROMPTS["elderly"])}]
-        messages.extend(session.history)
+        messages.extend(history_override if history_override is not None else session.history)
         messages.append({"role": "user", "content": message})
         
         headers = {

@@ -1,15 +1,28 @@
 import time
-from fastapi import FastAPI, Depends, HTTPException
+import os
+from typing import Optional, List
+from fastapi import FastAPI, Depends, HTTPException, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from .models import ChatMessage, AgentResponse, ExtractedIntel
+from .models import (
+    ChatMessage,
+    AgentResponse,
+    ExtractedIntel,
+    HackathonChatRequest,
+    HackathonChatResponse,
+    SessionData,
+)
 from .auth import get_api_key
 from .sessions import get_session, update_session_history
 from .extractor import extract_intelligence
-from .detector import detect_scam_heuristics
+from .detector import detect_scam_heuristics, KEYWORDS
 from .agent import HoneyPotAgent
 from .logger import log_interaction, log_intel
+import httpx
 
 app = FastAPI(title="Agentic Honey-Pot API")
+
+GUVI_CALLBACK_URL = "https://hackathon.guvi.in/api/updateHoneyPotFinalResult"
+GUVI_TURN_THRESHOLD = 6
 
 # Allow CORS for local development
 app.add_middleware(
@@ -68,3 +81,103 @@ async def process_message(
         risk_tags=risk_tags,
         extracted_intel=extracted_intel_data
     )
+
+def _sender_to_role(sender: str) -> str:
+    sender_lower = (sender or "").lower()
+    if sender_lower in {"scammer", "user", "customer"}:
+        return "user"
+    return "assistant"
+
+def _build_history(conversation_history) -> List[dict]:
+    history = []
+    for msg in conversation_history:
+        role = _sender_to_role(msg.sender)
+        history.append({"role": role, "content": msg.text})
+    return history
+
+def _extract_suspicious_keywords(text: str) -> List[str]:
+    text_lower = text.lower()
+    matches = []
+    for keywords in KEYWORDS.values():
+        for kw in keywords:
+            if kw in text_lower:
+                matches.append(kw)
+    return list(set(matches))
+
+async def send_guvi_callback(session_id: str, extracted_data: ExtractedIntel, msg_count: int, scam_detected: bool, suspicious_keywords: List[str]):
+    payload = {
+        "sessionId": session_id,
+        "scamDetected": scam_detected,
+        "totalMessagesExchanged": msg_count,
+        "extractedIntelligence": {
+            "bankAccounts": extracted_data.bank_accounts,
+            "upiIds": extracted_data.upi_ids,
+            "phishingLinks": extracted_data.urls,
+            "phoneNumbers": extracted_data.phone_numbers,
+            "suspiciousKeywords": suspicious_keywords
+        },
+        "agentNotes": "Scam detected." if scam_detected else "Threshold reached."
+    }
+    try:
+        async with httpx.AsyncClient() as client:
+            await client.post(GUVI_CALLBACK_URL, json=payload, timeout=10.0)
+    except Exception:
+        # Callback failures should never block or crash the API.
+        return
+
+async def get_hackathon_api_key(x_api_key: Optional[str] = Header(None, alias="x-api-key")):
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="Missing x-api-key header")
+    expected = os.getenv("HACKATHON_API_KEY")
+    if expected and x_api_key != expected:
+        raise HTTPException(status_code=401, detail="Invalid x-api-key header")
+    return x_api_key
+
+@app.post("/api/chat", response_model=HackathonChatResponse)
+@app.post("/api/hackathon/chat", response_model=HackathonChatResponse)
+async def chat_hackathon(
+    request: HackathonChatRequest,
+    background_tasks: BackgroundTasks,
+    api_key: str = Depends(get_hackathon_api_key)
+):
+    # Determine persona and optional LLM overrides from metadata
+    persona = "elderly"
+    llm_url = None
+    llm_model = None
+    if isinstance(request.metadata, dict):
+        persona = request.metadata.get("persona", persona)
+        llm_url = request.metadata.get("llmUrl") or request.metadata.get("llm_url")
+        llm_model = request.metadata.get("llmModel") or request.metadata.get("llm_model")
+
+    session = SessionData(
+        session_id=request.sessionId,
+        history=_build_history(request.conversationHistory),
+        persona=persona,
+        created_at=time.time(),
+    )
+
+    extracted_intel_data = extract_intelligence(request.message.text)
+    scam_confidence, risk_tags = detect_scam_heuristics(request.message.text, extracted_intel_data)
+
+    agent = HoneyPotAgent(
+        api_key=api_key,
+        llm_url=llm_url,
+        llm_model=llm_model
+    )
+    reply = await agent.generate_response(request.message.text, session, history_override=session.history)
+
+    msg_count = len(request.conversationHistory) + 1
+    scam_detected = scam_confidence > 50
+    suspicious_keywords = _extract_suspicious_keywords(request.message.text)
+
+    if scam_detected or msg_count >= GUVI_TURN_THRESHOLD:
+        background_tasks.add_task(
+            send_guvi_callback,
+            request.sessionId,
+            extracted_intel_data,
+            msg_count,
+            scam_detected,
+            suspicious_keywords,
+        )
+
+    return HackathonChatResponse(status="success", reply=reply)
